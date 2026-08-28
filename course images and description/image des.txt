@@ -1,0 +1,224 @@
+1. AI and Machine Learning
+Title: Artificial Intelligence & Machine Learning
+
+Subtitle: Master the Future of Technology.
+
+Description: Learn Python, Data Science, and build intelligent algorithms.
+
+Price: ₹45,000
+
+2. Angular
+Title: Angular Frontend Development
+
+Subtitle: Build Scalable Web Applications.
+
+Description: Master components, directives, and reactive forms in Angular.
+
+Price: ₹15,000
+
+3. AWS (Amazon Web Services)
+Title: AWS Cloud Practitioner & Solutions Architect
+
+Subtitle: Cloud Computing Simplified.
+
+Description: Learn cloud infrastructure, security, and AWS services.
+
+Price: ₹20,000
+
+4. C Programming
+Title: Master C Programming
+
+Subtitle: The Foundation of Computer Science.
+
+Description: Learn basics, pointers, and memory management.
+
+Price: ₹5,000
+
+5. C++ Programming
+Title: C++ Coding Bootcamp
+
+Subtitle: High-Performance Programming.
+
+Description: Deep dive into Object-Oriented Programming (OOP) and DSA.
+
+Price: ₹7,000
+
+6. Cyber Security
+Title: Cyber Security & Ethical Hacking
+
+Subtitle: Protect and Defend Digital Assets.
+
+Description: Learn network security, encryption, and ethical hacking.
+
+Price: ₹35,000
+
+7. Docker
+Title: Docker & Containerization
+
+Subtitle: Modernize Your DevOps Workflow.
+
+Description: Learn to create, deploy, and manage containers.
+
+Price: ₹12,000
+
+8. Git & GitHub
+Title: Version Control with Git & GitHub
+
+Subtitle: Collaborate and Manage Your Code.
+
+Description: Learn branching, merging, and open-source contribution.
+
+Price: ₹3,500
+
+9. HTML & CSS
+Title: Web Design Essentials (HTML5 & CSS3)
+
+Subtitle: Design Beautiful Websites.
+
+Description: Learn responsive design, Flexbox, and Grid.
+
+Price: ₹4,000
+
+10. Java
+Title: Core & Advanced Java
+
+Subtitle: Build Robust Enterprise Apps.
+
+Description: Master Java syntax, Multithreading, and Spring Boot.
+
+Price: ₹18,000
+
+11. JavaScript
+Title: JavaScript Mastery
+
+Subtitle: The Language of the Web.
+
+Description: Learn modern ES6+, DOM manipulation, and asynchronous programming.
+
+Price: ₹8,000
+
+12. Kotlin
+Title: Kotlin for Android
+
+Subtitle: Modern Android App Development.
+
+Description: Master Kotlin syntax and build native mobile applications.
+
+Price: ₹15,000
+
+13. Machine Learning Specialization
+Title: Machine Learning Specialization
+
+Subtitle: Advanced Data Science & AI.
+
+Description: Deep dive into supervised, unsupervised learning, and neural networks.
+
+Price: ₹50,000
+
+14. MERN Stack
+Title: Full Stack MERN Development
+
+Subtitle: MongoDB, Express, React, & Node.js.
+
+Description: Build and deploy complete full-stack web applications.
+
+Price: ₹40,000
+
+15. MongoDB
+Title: MongoDB Database Expert
+
+Subtitle: Master NoSQL Databases.
+
+Description: Learn document modeling, indexing, and aggregation pipelines.
+
+Price: ₹12,000
+
+16. MySQL
+Title: MySQL for Developers
+
+Subtitle: Relational Database Management.
+
+Description: Learn SQL queries, database design, and optimization.
+
+Price: ₹10,000
+
+17. NextJS
+Title: Next.js Framework
+
+Subtitle: The Ultimate React Framework.
+
+Description: Master Server-Side Rendering (SSR) and Static Site Generation (SSG).
+
+Price: ₹14,000
+
+18. Node.js & Express
+Title: Backend with Node & Express
+
+Subtitle: Build Scalable Server-side Apps.
+
+Description: Learn REST APIs, middleware, and backend logic.
+
+Price: ₹16,000
+
+19. PHP
+Title: PHP Web Development
+
+Subtitle: Server-side Scripting Made Easy.
+
+Description: Build dynamic websites using PHP and database integration.
+
+Price: ₹9,000
+
+20. Programming Fundamentals
+Title: Programming Fundamentals
+
+Subtitle: Start Your Coding Journey.
+
+Description: Understand logic, loops, and basic problem-solving for beginners.
+
+Price: ₹3,000
+
+21. Python Programming
+Title: Python for Beginners to Pro
+
+Subtitle: Most Popular Programming Language.
+
+Description: Master Python syntax, data types, and automation scripts.
+
+Price: ₹6,000
+
+22. ReactJS
+Title: ReactJS Development
+
+Subtitle: Build Dynamic User Interfaces.
+
+Description: Learn hooks, state management, and component-based architecture.
+
+Price: ₹15,000
+
+23. SQL
+Title: Structured Query Language (SQL)
+
+Subtitle: Manage and Query Data Efficiently.
+
+Description: Master complex joins, indexing, and database management.
+
+Price: ₹5,000
+
+24. VueJS
+Title: Progressive VueJS Framework
+
+Subtitle: Flexible Frontend Development.
+
+Description: Learn to build high-performance single-page applications (SPA).
+
+Price: ₹12,000
+
+25. Web Development
+Title: Full Stack Web Development
+
+Subtitle: Become a Professional Web Developer.
+
+Description: Complete roadmap covering HTML, CSS, JS, and Backend.
+
+Price: ₹30,000

@@ -1,0 +1,364 @@
+html {
+  scrollbar-width: none;        /* Firefox */
+}
+
+body {
+  -ms-overflow-style: none;     /* IE & Edge */
+}
+
+body::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari */
+}
+@import "tailwindcss";
+
+/* =========================
+  THEME DESIGN TOKENS
+  ========================= */
+
+/* ---------- LIGHT THEME ---------- */
+:root {
+  /* PAGE BACKGROUND (LIGHT) */
+  --bg-main: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.75);
+
+  /* TEXT */
+  --text-main: #020617;
+  --text-muted: #475569;
+
+  /* BORDER & SHADOW */
+  --border-main: rgba(2, 6, 23, 0.12);
+  --shadow-soft: 0 20px 40px rgba(2, 6, 23, 0.12);
+
+  /* ACCENT */
+  --accent-primary: #0284c7;
+  --accent-secondary: #06b6d4;
+
+  /* LIGHT MODE GRADIENT */
+  --gradient-main: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f0f9ff 50%,
+    #e0f2fe 100%
+  );
+}
+
+/* ---------- DARK THEME ---------- */
+.dark {
+  --bg-main: #020617;
+  --bg-surface: rgba(255,255,255,0.05);
+  --bg-glass: rgba(255,255,255,0.05);
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+
+  --border-main: rgba(255,255,255,0.1);
+  --shadow-soft: 0 0 40px rgba(124,58,237,0.15);
+
+  --accent-primary: #8b5cf6;
+  --accent-secondary: #22d3ee;
+
+  --gradient-main: linear-gradient(
+    to bottom right,
+    #050816,
+    #020617,
+    #020617
+  );
+}
+
+/* ---------- GLOBAL ---------- */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* ---------- INPUT PLACEHOLDER FIX ---------- */
+input::placeholder {
+  color: #64748b;
+  opacity: 1;
+}
+
+.dark input::placeholder {
+  color: #94a3b8;
+}
+
+/* ---------- CUSTOM UTILITY CLASSES ---------- */
+.bg-theme {
+  background-color: var(--bg-main);
+}
+
+.bg-theme-surface {
+  background-color: var(--bg-surface);
+}
+
+.bg-theme-glass {
+  background-color: var(--bg-glass);
+}
+
+.text-theme {
+  color: var(--text-main);
+}
+
+.text-theme-muted {
+  color: var(--text-muted);
+}
+
+.text-theme-accent {
+  color: var(--accent-primary);
+}
+
+.text-theme-accent-secondary {
+  color: var(--accent-secondary);
+}
+
+.border-theme {
+  border-color: var(--border-main);
+}
+
+.border-theme-accent {
+  border-color: var(--accent-primary);
+}
+
+.shadow-theme {
+  box-shadow: var(--shadow-soft);
+}
+
+.bg-gradient-theme {
+  background-image: var(--gradient-main);
+}
+
+/* Accent opacity utilities */
+.bg-theme-accent\/10 {
+  background-color: rgba(2, 132, 199, 0.1);
+}
+
+.dark .bg-theme-accent\/10 {
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+.bg-theme-accent\/20 {
+  background-color: rgba(2, 132, 199, 0.2);
+}
+
+.dark .bg-theme-accent\/20 {
+  background-color: rgba(139, 92, 246, 0.2);
+}
+
+.border-theme-accent\/20 {
+  border-color: rgba(2, 132, 199, 0.2);
+}
+
+.dark .border-theme-accent\/20 {
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.border-theme-accent\/50 {
+  border-color: rgba(2, 132, 199, 0.5);
+}
+
+.dark .border-theme-accent\/50 {
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.text-theme-muted\/50 {
+  color: rgba(71, 85, 105, 0.5);
+}
+
+.dark .text-theme-muted\/50 {
+  color: rgba(148, 163, 184, 0.5);
+}
+
+.text-theme-muted\/20 {
+  color: rgba(71, 85, 105, 0.2);
+}
+
+.dark .text-theme-muted\/20 {
+  color: rgba(148, 163, 184, 0.2);
+}
+
+.text-theme-accent\/20 {
+  color: rgba(2, 132, 199, 0.2);
+}
+
+.dark .text-theme-accent\/20 {
+  color: rgba(139, 92, 246, 0.2);
+}
+
+/* Progress bar background */
+.bg-theme\/30 {
+  background-color: rgba(248, 250, 252, 0.3);
+}
+
+.dark .bg-theme\/30 {
+  background-color: rgba(2, 6, 23, 0.3);
+}
+
+/* Focus states */
+.focus\:border-theme-accent:focus {
+  border-color: var(--accent-primary);
+}
+
+.focus\:border-theme-accent\/50:focus {
+  border-color: rgba(2, 132, 199, 0.5);
+}
+
+.dark .focus\:border-theme-accent\/50:focus {
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+/* Hover states */
+.hover\:bg-theme-accent:hover {
+  background-color: var(--accent-primary);
+}
+
+.hover\:border-theme-accent\/50:hover {
+  border-color: rgba(2, 132, 199, 0.5);
+}
+
+.dark .hover\:border-theme-accent\/50:hover {
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.hover\:text-theme-accent:hover {
+  color: var(--accent-primary);
+}
+
+/* Group hover */
+.group:hover .group-hover\:text-theme-accent {
+  color: var(--accent-primary);
+}
+
+/* Background hover */
+.hover\:bg-theme-surface:hover {
+  background-color: var(--bg-surface);
+}
+
+.hover\:bg-theme:hover {
+  background-color: var(--bg-main);
+}
+
+/* Progress bar gradient */
+.bg-progress-gradient {
+  background: linear-gradient(
+    to right,
+    var(--accent-primary),
+    var(--accent-secondary)
+  );
+}
+
+/* ============================= */
+/* 🔹 NEW: THEMED SELECT DROPDOWN */
+/* ============================= */
+
+select.custom-select {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  border-color: var(--border-main);
+}
+
+/* Dropdown panel background */
+select.custom-select option {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  padding: 10px;
+}
+
+/* Selected / hovered option - ACCENT COLOR */
+select.custom-select option:hover,
+select.custom-select option:checked {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+/* Better focus ring matching your theme */
+select.custom-select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.25);
+}
+
+/* Dark mode tweak */
+.dark select.custom-select {
+  background-color: rgba(255,255,255,0.05);
+}
+
+.dark select.custom-select option {
+  background-color: #020617;
+}
+
+.dark select.custom-select option:hover,
+.dark select.custom-select option:checked {
+  background-color: var(--accent-primary);
+}
+
+/* Ensure native dropdown arrow is visible */
+select {
+  -webkit-appearance: menulist-button;
+  appearance: menulist-button;
+}
+.bg-accent-gradient {
+  background: linear-gradient(
+    to right,
+    var(--accent-primary),
+    var(--accent-secondary)
+  );
+}
+/* Add this to your GLOBAL section in the CSS file */
+.from-theme-accent {
+  --tw-gradient-from: var(--accent-primary) !important;
+  --tw-gradient-to: var(--accent-primary, transparent) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+.to-theme-accent-secondary {
+  --tw-gradient-to: var(--accent-secondary) !important;
+}
+/* THEMED SELECT */
+
+select.custom-select {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-main);
+}
+
+/* Dropdown options */
+select.custom-select option {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+}
+
+/* Dark Mode Specific Fix */
+.dark select.custom-select {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+.dark select.custom-select option {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+/* Focus */
+select.custom-select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+/* ============================= */
+/* ACCENT BACKGROUND UTILITIES  */
+/* ============================= */
+
+.bg-theme-accent {
+  background-color: var(--accent-primary);
+}
+
+.hover\:bg-theme-accent\/90:hover {
+  background-color: rgba(2, 132, 199, 0.9);
+}
+
+.dark .hover\:bg-theme-accent\/90:hover {
+  background-color: rgba(139, 92, 246, 0.9);
+}
