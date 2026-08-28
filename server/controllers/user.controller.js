@@ -235,7 +235,14 @@ export const login = (req, res, next) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: info?.message || "Login failed",
+        message: info?.message || "Invalid email or password",
+      });
+    }
+
+    if (!user.isVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Please verify your email OTP before logging in.",
       });
     }
 
