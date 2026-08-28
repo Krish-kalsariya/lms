@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { HelpCircle, Search, BookOpen, MessageCircle, Phone, Mail, ChevronDown, ChevronUp } from "lucide-react";
-import Footer from "../../components/Footer";
+import Footer from "../../components/footer";
 
 const HelpCenter = () => {
   const [searchQuery, setSearchQuery] = useState("");

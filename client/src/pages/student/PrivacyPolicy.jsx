@@ -1,5 +1,5 @@
 import { Shield, Lock, Eye, Database, Share2, Cookie } from "lucide-react";
-import Footer from "../../components/Footer";
+import Footer from "../../components/footer";
 
 const PrivacyPolicy = () => {
   const sections = [

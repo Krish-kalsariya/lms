@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, User, Calendar } from "lucide-react";
-import Footer from "../../components/Footer";
+import Footer from "../../components/footer";
 
 export default function Blog() {
   const blogs = [

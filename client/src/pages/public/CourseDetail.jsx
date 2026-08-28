@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/Authcontext";
 import { useNavigate } from "react-router-dom";
-import Footer from "../../components/Footer";
+import Footer from "../../components/footer";
 
 const CourseDetail = () => {
   const { user } = useAuth();

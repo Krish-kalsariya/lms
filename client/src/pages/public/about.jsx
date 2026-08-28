@@ -7,7 +7,7 @@ import {
   Users,
   Rocket,
 } from "lucide-react";
-import Footer from "../../components/Footer";
+import Footer from "../../components/footer";
 
 export default function AboutUs() {
   const [user, setUser] = useState(null);

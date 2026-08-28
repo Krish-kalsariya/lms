@@ -1,5 +1,5 @@
 import { FileText, Scale, Users, CreditCard, AlertTriangle, CheckCircle } from "lucide-react";
-import Footer from "../../components/Footer";
+import Footer from "../../components/footer";
 
 const TermsOfService = () => {
   const sections = [
