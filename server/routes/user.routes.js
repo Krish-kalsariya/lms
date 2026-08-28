@@ -8,6 +8,7 @@ import {
   getAllStudents,
   changeStudentStatus,
   verifyOtp,
+  resendOtp,
   forgotPassword,
   resetPassword,
   verifyResetOtp,
@@ -39,6 +40,7 @@ router.patch("/:id/status", isAuthenticated, isInstructor, changeStudentStatus);
 
 /* VERIFY OTP */
 router.post("/verify-otp", verifyOtp);
+router.post("/resend-otp", resendOtp);
 
 /* Forget password */
 router.post("/forgot-password", forgotPassword);
