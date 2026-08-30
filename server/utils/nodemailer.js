@@ -19,7 +19,35 @@ export const sendEmail = async ({ to, subject, html }) => {
     }
   }
 
-  // Option B: Resend API (HTTPS REST API over Port 443 - zero SMTP port blocking)
+  // Option B: Brevo API (HTTPS REST API over Port 443 - 300 free emails/day to ANY recipient email!)
+  if (process.env.BREVO_API_KEY) {
+    try {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          sender: { name: "Brainera LMS", email: process.env.EMAIL_USER || "error22.prof@gmail.com" },
+          to: [{ email: to }],
+          subject: subject,
+          htmlContent: html,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log(`Email successfully sent to ${to} via Brevo HTTP API!`);
+        return;
+      }
+      console.warn("Brevo API error:", data);
+    } catch (brevoErr) {
+      console.warn("Brevo API send failed:", brevoErr.message);
+    }
+  }
+
+  // Option C: Resend API (HTTPS REST API over Port 443)
   if (process.env.RESEND_API_KEY) {
     try {
       const response = await fetch("https://api.resend.com/emails", {
