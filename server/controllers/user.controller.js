@@ -66,25 +66,21 @@ export const register = async (req, res) => {
       });
     }
 
-    // SEND OTP EMAIL
-    try {
-      await sendEmail({
-        to: cleanEmail,
-        subject: "Verify Your Email - OTP",
-        html: `
-          <h2>Email Verification</h2>
-          <p>Your OTP is:</p>
-          <h1>${otp}</h1>
-          <p>This OTP is valid for 5 minutes.</p>
-        `,
-      });
-    } catch (emailErr) {
-      console.error("Failed to send OTP email during registration:", emailErr);
-      return res.status(500).json({
-        success: false,
-        message: emailErr.message || "Failed to send OTP email. Please check server EMAIL_USER/EMAIL_PASS configuration.",
-      });
-    }
+    console.log(`🔑 [REGISTER OTP GENERATED] for ${cleanEmail}: ${otp}`);
+
+    // SEND OTP EMAIL (Non-blocking so cloud SMTP port blocks/timeouts never crash registration)
+    sendEmail({
+      to: cleanEmail,
+      subject: "Verify Your Email - OTP",
+      html: `
+        <h2>Email Verification</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP is valid for 5 minutes.</p>
+      `,
+    }).catch((emailErr) => {
+      console.error(`⚠️ Failed to send OTP email to ${cleanEmail}:`, emailErr.message || emailErr);
+    });
 
     // DELETE UNVERIFIED USER AFTER 5 MINUTES
     setTimeout(async () => {
@@ -156,7 +152,7 @@ export const verifyOtp = async (req, res) => {
     user.otpExpiry = undefined;
     await user.save();
 
-    // SEND WELCOME EMAIL AFTER VERIFY (Non-blocking so email delivery delays don't affect verification UX)
+    // SEND WELCOME EMAIL AFTER VERIFY (Non-blocking)
     sendEmail({
       to: user.email,
       subject: "Welcome to Brainera ",
@@ -227,24 +223,21 @@ export const resendOtp = async (req, res) => {
     user.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
     await user.save();
 
-    try {
-      await sendEmail({
-        to: cleanEmail,
-        subject: "Verify Your Email - Resent OTP",
-        html: `
-          <h2>Email Verification</h2>
-          <p>Your new OTP is:</p>
-          <h1>${otp}</h1>
-          <p>This OTP is valid for 5 minutes.</p>
-        `,
-      });
-    } catch (emailErr) {
-      console.error("Resend OTP email error:", emailErr);
-      return res.status(500).json({
-        success: false,
-        message: emailErr.message || "Failed to resend OTP email.",
-      });
-    }
+    console.log(`🔑 [RESEND OTP GENERATED] for ${cleanEmail}: ${otp}`);
+
+    // Send OTP email in background (non-blocking)
+    sendEmail({
+      to: cleanEmail,
+      subject: "Verify Your Email - Resent OTP",
+      html: `
+        <h2>Email Verification</h2>
+        <p>Your new OTP is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP is valid for 5 minutes.</p>
+      `,
+    }).catch((emailErr) => {
+      console.error(`⚠️ Resend OTP email error for ${cleanEmail}:`, emailErr.message || emailErr);
+    });
 
     return res.status(200).json({
       success: true,
@@ -337,24 +330,21 @@ export const forgotPassword = async (req, res) => {
     user.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
     await user.save();
 
-    try {
-      await sendEmail({
-        to: cleanEmail,
-        subject: "Password Reset OTP",
-        html: `
-          <h2>Password Reset</h2>
-          <p>Your OTP is:</p>
-          <h1>${otp}</h1>
-          <p>Valid for 5 minutes</p>
-        `,
-      });
-    } catch (emailErr) {
-      console.error("Forgot password email send error:", emailErr);
-      return res.status(500).json({
-        success: false,
-        message: emailErr.message || "Failed to send reset OTP email.",
-      });
-    }
+    console.log(`🔑 [FORGOT PASSWORD OTP GENERATED] for ${cleanEmail}: ${otp}`);
+
+    // Send OTP email in background (non-blocking)
+    sendEmail({
+      to: cleanEmail,
+      subject: "Password Reset OTP",
+      html: `
+        <h2>Password Reset</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
+        <p>Valid for 5 minutes</p>
+      `,
+    }).catch((emailErr) => {
+      console.error(`⚠️ Password reset email send error for ${cleanEmail}:`, emailErr.message || emailErr);
+    });
 
     return res.status(200).json({
       success: true,
