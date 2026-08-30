@@ -9,12 +9,12 @@ passport.use(
     { usernameField: "email" },
     async (email, password, done) => {
       try {
-        const user = await User.findOne({ email });
+        const cleanEmail = email ? email.trim().toLowerCase() : "";
+        const user = await User.findOne({ email: cleanEmail });
         if (!user) {
           return done(null, false, { message: "Invalid credentials" });
         }
 
-    
         if (user.status === "deactive") {
           return done(null, false, {
             message: "Your account has been deactivated",

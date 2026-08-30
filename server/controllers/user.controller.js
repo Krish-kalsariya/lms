@@ -18,7 +18,10 @@ export const register = async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name.trim();
+
+    const existingUser = await User.findOne({ email: cleanEmail });
 
     // If already verified
     if (existingUser && existingUser.isVerified) {
@@ -45,6 +48,8 @@ export const register = async (req, res) => {
 
     // If user exists but not verified resend OTP
     if (existingUser && !existingUser.isVerified) {
+      existingUser.name = cleanName;
+      existingUser.password = hashedPassword;
       existingUser.otp = otp;
       existingUser.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
       await existingUser.save();
@@ -52,8 +57,8 @@ export const register = async (req, res) => {
     } else {
       // Create new user
       user = await User.create({
-        name,
-        email,
+        name: cleanName,
+        email: cleanEmail,
         password: hashedPassword,
         otp,
         otpExpiry: Date.now() + 5 * 60 * 1000, // 5 minutes
@@ -62,23 +67,34 @@ export const register = async (req, res) => {
     }
 
     // SEND OTP EMAIL
-    await sendEmail({
-      to: email,
-      subject: "Verify Your Email - OTP",
-      html: `
-        <h2>Email Verification</h2>
-        <p>Your OTP is:</p>
-        <h1>${otp}</h1>
-        <p>This OTP is valid for 5 minutes.</p>
-      `,
-    });
+    try {
+      await sendEmail({
+        to: cleanEmail,
+        subject: "Verify Your Email - OTP",
+        html: `
+          <h2>Email Verification</h2>
+          <p>Your OTP is:</p>
+          <h1>${otp}</h1>
+          <p>This OTP is valid for 5 minutes.</p>
+        `,
+      });
+    } catch (emailErr) {
+      console.error("Failed to send OTP email during registration:", emailErr);
+      return res.status(500).json({
+        success: false,
+        message: emailErr.message || "Failed to send OTP email. Please check server EMAIL_USER/EMAIL_PASS configuration.",
+      });
+    }
 
     // DELETE UNVERIFIED USER AFTER 5 MINUTES
     setTimeout(async () => {
-      const existingUser = await User.findById(user._id);
-      if (existingUser && !existingUser.isVerified) {
-        await User.findByIdAndDelete(user._id);
-        //console.log(`Unverified user ${existingUser.email} deleted after 5 minutes`);
+      try {
+        const existingUser = await User.findById(user._id);
+        if (existingUser && !existingUser.isVerified) {
+          await User.findByIdAndDelete(user._id);
+        }
+      } catch (err) {
+        console.error("Cleanup unverified user error:", err);
       }
     }, 5 * 60 * 1000); // 5 minutes 
 
@@ -108,12 +124,15 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanOtp = String(otp).trim();
+
+    const user = await User.findOne({ email: cleanEmail });
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found.",
+        message: "User not found or OTP expired",
       });
     }
 
@@ -124,7 +143,7 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
-    if (user.otp !== otp || user.otpExpiry < Date.now()) {
+    if (user.otp !== cleanOtp || user.otpExpiry < Date.now()) {
       return res.status(400).json({
         success: false,
         message: "Invalid or expired OTP.",
@@ -137,8 +156,8 @@ export const verifyOtp = async (req, res) => {
     user.otpExpiry = undefined;
     await user.save();
 
-    // SEND WELCOME EMAIL AFTER VERIFY
-    await sendEmail({
+    // SEND WELCOME EMAIL AFTER VERIFY (Non-blocking so email delivery delays don't affect verification UX)
+    sendEmail({
       to: user.email,
       subject: "Welcome to Brainera ",
       html: `
@@ -146,6 +165,8 @@ export const verifyOtp = async (req, res) => {
         <p>Your email has been verified successfully.</p>
         <p>You can now login and start learning </p>
       `,
+    }).catch((err) => {
+      console.error("Welcome email background send error:", err.message || err);
     });
 
     return res.status(200).json({
@@ -154,9 +175,10 @@ export const verifyOtp = async (req, res) => {
     });
 
   } catch (error) {
+    console.error("OTP verification error:", error);
     return res.status(500).json({
       success: false,
-      message: "OTP verification failed.",
+      message: error.message || "OTP verification failed.",
     });
   }
 };
@@ -173,7 +195,9 @@ export const resendOtp = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email: cleanEmail });
 
     if (!user) {
       return res.status(404).json({
@@ -203,16 +227,24 @@ export const resendOtp = async (req, res) => {
     user.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
     await user.save();
 
-    await sendEmail({
-      to: email,
-      subject: "Verify Your Email - Resent OTP",
-      html: `
-        <h2>Email Verification</h2>
-        <p>Your new OTP is:</p>
-        <h1>${otp}</h1>
-        <p>This OTP is valid for 5 minutes.</p>
-      `,
-    });
+    try {
+      await sendEmail({
+        to: cleanEmail,
+        subject: "Verify Your Email - Resent OTP",
+        html: `
+          <h2>Email Verification</h2>
+          <p>Your new OTP is:</p>
+          <h1>${otp}</h1>
+          <p>This OTP is valid for 5 minutes.</p>
+        `,
+      });
+    } catch (emailErr) {
+      console.error("Resend OTP email error:", emailErr);
+      return res.status(500).json({
+        success: false,
+        message: emailErr.message || "Failed to resend OTP email.",
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -222,7 +254,7 @@ export const resendOtp = async (req, res) => {
     console.error("Resend OTP error:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to resend OTP.",
+      message: error.message || "Failed to resend OTP.",
     });
   }
 };
@@ -230,6 +262,9 @@ export const resendOtp = async (req, res) => {
 
 /* LOGIN */
 export const login = (req, res, next) => {
+  if (req.body && req.body.email) {
+    req.body.email = req.body.email.trim().toLowerCase();
+  }
   passport.authenticate("local", (err, user, info) => {
     if (err) return next(err);
 
@@ -276,7 +311,9 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email: cleanEmail });
 
     if (!user) {
       return res.status(404).json({
@@ -300,16 +337,24 @@ export const forgotPassword = async (req, res) => {
     user.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
     await user.save();
 
-    await sendEmail({
-      to: user.email,
-      subject: "Password Reset OTP",
-      html: `
-        <h2>Password Reset</h2>
-        <p>Your OTP is:</p>
-        <h1>${otp}</h1>
-        <p>Valid for 5 minutes</p>
-      `,
-    });
+    try {
+      await sendEmail({
+        to: cleanEmail,
+        subject: "Password Reset OTP",
+        html: `
+          <h2>Password Reset</h2>
+          <p>Your OTP is:</p>
+          <h1>${otp}</h1>
+          <p>Valid for 5 minutes</p>
+        `,
+      });
+    } catch (emailErr) {
+      console.error("Forgot password email send error:", emailErr);
+      return res.status(500).json({
+        success: false,
+        message: emailErr.message || "Failed to send reset OTP email.",
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -318,7 +363,7 @@ export const forgotPassword = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Failed to send OTP",
+      message: error.message || "Failed to send OTP",
     });
   }
 };
