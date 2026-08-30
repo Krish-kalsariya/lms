@@ -26,6 +26,27 @@ router.get("/me", (req, res) => {
   res.status(401).json({ message: "Not logged in" });
 });
 
+router.get("/test-email", async (req, res) => {
+  try {
+    const { sendEmail } = await import("../utils/nodemailer.js");
+    await sendEmail({
+      to: process.env.EMAIL_USER || "error22.prof@gmail.com",
+      subject: "Test Diagnostic Email",
+      html: "<p>Test email from Render server</p>",
+    });
+    return res.json({ success: true, message: "Email sent successfully!" });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message || String(error),
+      code: error.code,
+      command: error.command,
+      envUser: Boolean(process.env.EMAIL_USER),
+      envPass: Boolean(process.env.EMAIL_PASS),
+    });
+  }
+});
+
 router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", logout);
