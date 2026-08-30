@@ -2,6 +2,8 @@ import { useState, useRef } from "react";
 import api from "../../api/axios.js";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { AnimatePresence, motion } from "framer-motion";
+import OtpVerify from "../../components/OtpVerify.jsx";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -93,6 +95,7 @@ export default function Register() {
       setLoading(true);
 
       const { data } = await api.post("/users/register", formData);
+      console.log("🔑 [DEBUG] OTP Received on Register:", data.otp);
       toast.success(data.message || "Registration successful 🎉", {
         id: "register-success",
       });
@@ -108,20 +111,8 @@ export default function Register() {
   };
 
   /* ================= VERIFY OTP ================= */
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
+  const handleVerifyOtpCode = async (otpCode) => {
     if (requestLock.current) return;
-
-    // 🔹 OTP validation
-    if (!otp) {
-      toast.error("OTP is required", { id: "otp-invalid" });
-      return;
-    }
-
-    if (!/^\d{6}$/.test(otp)) {
-      toast.error("OTP must be exactly 6 digits", { id: "otp-invalid" });
-      return;
-    }
 
     try {
       requestLock.current = true;
@@ -129,7 +120,7 @@ export default function Register() {
 
       const { data } = await api.post("/users/verify-otp", {
         email: formData.email,
-        otp,
+        otp: otpCode,
       });
 
       toast.success(data.message || "Email verified ✔", {
@@ -166,6 +157,7 @@ export default function Register() {
       const { data } = await api.post("/users/resend-otp", {
         email: formData.email,
       });
+      console.log("🔑 [DEBUG] OTP Received on Resend:", data.otp);
 
       toast.success(data.message || "OTP resent successfully 📧", {
         id: "otp-resend",
@@ -198,122 +190,92 @@ export default function Register() {
   return (
     <section className="min-h-screen flex items-center justify-center bg-(--gradient-main) px-4 transition-colors duration-300">
       <div className="w-full max-w-md rounded-2xl border border-(--border-main) bg-(--bg-glass) backdrop-blur-xl shadow-2xl p-8">
-
-        {/* HEADER */}
-        <h2 className="text-3xl font-extrabold text-center mb-6">
-          <span className="bg-linear-to-r from-violet-500 to-cyan-400 bg-clip-text text-transparent">
-            {step === "register" ? "Create Account" : "Verify Email"}
-          </span>
-        </h2>
-
-        <p className="text-center text-(--text-muted) text-sm mb-8">
-          {step === "register"
-            ? "Start your learning journey with us"
-            : "Enter the OTP sent to your email"}
-        </p>
-
-        {/* ================= REGISTER FORM ================= */}
-        {step === "register" && (
-          <form onSubmit={handleRegister} className="space-y-5">
-            <input
-              type="text"
-              placeholder="Full Name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main)"
-            />
-
-            <input
-              type="email"
-              placeholder="Email address"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main)"
-            />
-
-            <input
-              type="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main)"
-            />
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl font-semibold text-white
-                         bg-linear-to-r from-violet-600 to-cyan-500
-                         hover:shadow-lg transition disabled:opacity-50"
+        <AnimatePresence mode="wait">
+          {step === "register" ? (
+            <motion.div
+              key="register"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.25 }}
+              className="space-y-6"
             >
-              {loading ? "Registering..." : "Create Account"}
-            </button>
+              {/* HEADER */}
+              <div>
+                <h2 className="text-3xl font-extrabold text-center mb-2">
+                  <span className="bg-linear-to-r from-violet-500 to-cyan-400 bg-clip-text text-transparent">
+                    Create Account
+                  </span>
+                </h2>
+                <p className="text-center text-(--text-muted) text-sm">
+                  Start your learning journey with us
+                </p>
+              </div>
 
-            <p className="text-(--text-muted) text-center text-sm">
-              Already have an account?{" "}
-              <span
-                className="text-(--accent-primary) cursor-pointer hover:underline"
-                onClick={() => navigate("/login")}
-              >
-                Login
-              </span>
-            </p>
-          </form>
-        )}
+              {/* ================= REGISTER FORM ================= */}
+              <form onSubmit={handleRegister} className="space-y-5">
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main) outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 focus:bg-(--bg-surface) transition-all duration-200"
+                />
 
-        {/* ================= OTP VERIFY FORM ================= */}
-        {step === "verify" && (
-          <form onSubmit={handleVerifyOtp} className="space-y-5">
-            <p className="text-center text-(--text-muted) text-sm">
-              OTP sent to <br />
-              <span className="text-(--accent-primary) font-medium">
-                {formData.email}
-              </span>
-            </p>
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main) outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 focus:bg-(--bg-surface) transition-all duration-200"
+                />
 
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              placeholder="Enter 6-digit OTP"
-              value={otp}
-              onChange={(e) =>
-                setOtp(e.target.value.replace(/\D/g, ""))
-              }
-              className="w-full px-4 py-3 text-center tracking-widest rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main)"
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main) outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 focus:bg-(--bg-surface) transition-all duration-200"
+                />
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3.5 rounded-xl font-semibold text-white bg-linear-to-r from-violet-600 to-cyan-500 hover:shadow-lg transition-all duration-300 disabled:opacity-50 active:scale-[0.99] cursor-pointer"
+                >
+                  {loading ? "Registering..." : "Create Account"}
+                </button>
+
+                <p className="text-(--text-muted) text-center text-sm">
+                  Already have an account?{" "}
+                  <span
+                    className="text-violet-500 dark:text-violet-400 font-semibold cursor-pointer hover:underline"
+                    onClick={() => navigate("/login")}
+                  >
+                    Login
+                  </span>
+                </p>
+              </form>
+            </motion.div>
+          ) : (
+            <OtpVerify
+              key="otp-verify"
+              email={formData.email}
+              loading={loading}
+              onVerify={handleVerifyOtpCode}
+              onResend={resendOtp}
+              onCancel={handleCancelOtp}
             />
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl font-semibold text-white bg-green-600 hover:bg-green-700"
-            >
-              {loading ? "Verifying..." : "Verify OTP"}
-            </button>
-
-            <button
-              type="button"
-              onClick={handleCancelOtp}
-              className="w-full py-3 rounded-xl bg-(--bg-glass) text-(--text-main)"
-            >
-              Cancel
-            </button>
-
-            <p
-              onClick={resendOtp}
-              className="text-(--accent-primary) text-center text-sm cursor-pointer hover:underline"
-            >
-              Resend OTP
-            </p>
-          </form>
-        )}
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );
+
 }

@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { useAuth } from "../../context/Authcontext";
 import toast from "react-hot-toast";
+import { AnimatePresence, motion } from "framer-motion";
+import OtpVerify from "../../components/OtpVerify.jsx";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -69,7 +71,7 @@ export default function Login() {
 
   /* ================= SEND OTP ================= */
   const handleSendOtp = async (e) => {
-    e.preventDefault();
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
     if (loading) return;
 
     const email = forgotEmail.trim();
@@ -88,7 +90,8 @@ export default function Login() {
       setLoading(true);
       toast.dismiss();
 
-      await api.post("/users/forgot-password", { email });
+      const { data } = await api.post("/users/forgot-password", { email });
+      console.log("🔑 [DEBUG] OTP Received on Forgot Password:", data.otp);
       toast.success("OTP sent to your email", { id: "otp-sent" });
       setStep("verify");
     } catch (err) {
@@ -102,19 +105,8 @@ export default function Login() {
   };
 
   /* ================= VERIFY OTP ================= */
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
+  const handleVerifyOtpCode = async (otpCode) => {
     if (loading) return;
-
-    if (!otp) {
-      toast.error("OTP is required", { id: "auth-error" });
-      return;
-    }
-
-    if (!/^\d{6}$/.test(otp)) {
-      toast.error("OTP must be exactly 6 digits", { id: "auth-error" });
-      return;
-    }
 
     try {
       setLoading(true);
@@ -122,9 +114,10 @@ export default function Login() {
 
       await api.post("/users/verify-reset-otp", {
         email: forgotEmail,
-        otp,
+        otp: otpCode,
       });
 
+      setOtp(otpCode);
       toast.success("OTP verified", { id: "otp-verified" });
       setStep("reset");
     } catch (err) {
@@ -212,114 +205,150 @@ export default function Login() {
   return (
     <section className="min-h-screen flex items-center justify-center bg-(--gradient-main) px-4 transition-colors duration-300">
       <div className="relative w-full max-w-md rounded-2xl border border-(--border-main) bg-(--bg-glass) backdrop-blur-xl shadow-2xl p-8">
+        <AnimatePresence mode="wait">
+          {step === "login" && (
+            <motion.div
+              key="login"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.25 }}
+              className="space-y-6"
+            >
+              {/* HEADER */}
+              <div>
+                <h2 className="text-3xl font-extrabold text-center mb-2">
+                  <span className="bg-linear-to-r from-violet-500 to-cyan-400 bg-clip-text text-transparent">
+                    Welcome Back
+                  </span>
+                </h2>
+                <p className="text-center text-(--text-muted) text-sm">
+                  Login to continue your learning journey
+                </p>
+              </div>
 
-        <h2 className="text-3xl font-extrabold text-center mb-6">
-          <span className="bg-linear-to-r from-violet-500 to-cyan-400 bg-clip-text text-transparent">
-            {step === "login" && "Welcome Back"}
-            {step === "forgot" && "Forgot Password"}
-            {step === "verify" && "Verify OTP"}
-            {step === "reset" && "Set New Password"}
-          </span>
-        </h2>
+              <form onSubmit={handleLogin} className="space-y-5">
+                <input type="email" name="email" placeholder="Email address"
+                  value={formData.email} onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main) outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 focus:bg-(--bg-surface) transition-all duration-200" />
 
-        <p className="text-center text-(--text-muted) text-sm mb-6">
-          {step === "login" && "Login to continue your learning journey"}
-          {step === "forgot" && "Enter your registered email"}
-          {step === "verify" && "Enter the OTP sent to your email"}
-          {step === "reset" && "Create a strong new password"}
-        </p>
+                <input type="password" name="password" placeholder="Password"
+                  value={formData.password} onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main) outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 focus:bg-(--bg-surface) transition-all duration-200" />
 
-        {/* UI BELOW IS 100% UNCHANGED */}
-        {/* LOGIN */}
-        {step === "login" && (
-          <form onSubmit={handleLogin} className="space-y-5">
-            <input type="email" name="email" placeholder="Email address"
-              value={formData.email} onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main)" />
+                <button disabled={loading}
+                  className="w-full py-3.5 rounded-xl font-semibold text-white bg-linear-to-r from-violet-600 to-cyan-500 hover:shadow-lg transition-all duration-300 disabled:opacity-50 active:scale-[0.99] cursor-pointer">
+                  {loading ? "Logging in..." : "Login"}
+                </button>
 
-            <input type="password" name="password" placeholder="Password"
-              value={formData.password} onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main)" />
+                <p onClick={() => setStep("forgot")}
+                  className="text-sm text-violet-500 dark:text-violet-400 text-center cursor-pointer hover:underline font-semibold">
+                  Forgot password?
+                </p>
+              </form>
 
-            <button disabled={loading}
-              className="w-full py-3 rounded-xl font-semibold text-white bg-linear-to-r from-violet-600 to-cyan-500 hover:shadow-lg transition disabled:opacity-50">
-              {loading ? "Logging in..." : "Login"}
-            </button>
+              <p className="text-center text-sm text-(--text-muted) pt-2 border-t border-(--border-main)">
+                Don&apos;t have an account?{" "}
+                <Link to="/register" className="text-violet-500 dark:text-violet-400 font-semibold hover:underline">
+                  Register
+                </Link>
+              </p>
+            </motion.div>
+          )}
 
-            <p onClick={() => setStep("forgot")}
-              className="text-sm text-(--accent-primary) text-center cursor-pointer hover:underline">
-              Forgot password?
-            </p>
-          </form>
-        )}
+          {step === "forgot" && (
+            <motion.div
+              key="forgot"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.25 }}
+              className="space-y-6"
+            >
+              {/* HEADER */}
+              <div>
+                <h2 className="text-3xl font-extrabold text-center mb-2">
+                  <span className="bg-linear-to-r from-violet-500 to-cyan-400 bg-clip-text text-transparent">
+                    Forgot Password
+                  </span>
+                </h2>
+                <p className="text-center text-(--text-muted) text-sm">
+                  Enter your registered email
+                </p>
+              </div>
 
-        {/* FORGOT */}
-        {step === "forgot" && (
-          <form onSubmit={handleSendOtp} className="space-y-5">
-            <input type="email" placeholder="Enter your email"
-              value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main)" />
+              <form onSubmit={handleSendOtp} className="space-y-5">
+                <input type="email" placeholder="Enter your email"
+                  value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main) outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 focus:bg-(--bg-surface) transition-all duration-200" />
 
-            <button disabled={loading}
-              className="w-full py-3 rounded-xl font-semibold text-white bg-green-600 hover:bg-green-700">
-              {loading ? "Sending OTP..." : "Send OTP"}
-            </button>
+                <button disabled={loading}
+                  className="w-full py-3.5 rounded-xl font-semibold text-white bg-linear-to-r from-violet-600 to-cyan-500 hover:shadow-lg transition-all duration-300 disabled:opacity-50 active:scale-[0.99] cursor-pointer">
+                  {loading ? "Sending OTP..." : "Send OTP"}
+                </button>
 
-            <button type="button" onClick={() => setStep("login")}
-              className="w-full py-3 rounded-xl bg-(--bg-glass) text-(--text-main)">
-              Back to Login
-            </button>
-          </form>
-        )}
+                <button type="button" onClick={() => setStep("login")}
+                  className="w-full py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main) hover:bg-(--bg-surface) transition duration-200 cursor-pointer">
+                  Back to Login
+                </button>
+              </form>
+            </motion.div>
+          )}
 
-        {/* VERIFY */}
-        {step === "verify" && (
-          <form onSubmit={handleVerifyOtp} className="space-y-5">
-            <input type="text" maxLength={6} placeholder="Enter 6-digit OTP"
-              value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-              className="w-full px-4 py-3 text-center tracking-widest rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main)" />
+          {step === "verify" && (
+            <OtpVerify
+              key="otp-verify"
+              email={forgotEmail}
+              loading={loading}
+              onVerify={handleVerifyOtpCode}
+              onResend={() => handleSendOtp({ preventDefault: () => {} })}
+              onCancel={() => setStep("forgot")}
+            />
+          )}
 
-            <button disabled={loading}
-              className="w-full py-3 rounded-xl font-semibold text-white bg-green-600 hover:bg-green-700">
-              {loading ? "Verifying..." : "Verify OTP"}
-            </button>
+          {step === "reset" && (
+            <motion.div
+              key="reset"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.25 }}
+              className="space-y-6"
+            >
+              {/* HEADER */}
+              <div>
+                <h2 className="text-3xl font-extrabold text-center mb-2">
+                  <span className="bg-linear-to-r from-violet-500 to-cyan-400 bg-clip-text text-transparent">
+                    Set New Password
+                  </span>
+                </h2>
+                <p className="text-center text-(--text-muted) text-sm">
+                  Create a strong new password
+                </p>
+              </div>
 
-            <button type="button" onClick={() => setStep("forgot")}
-              className="w-full py-3 rounded-xl bg-(--bg-glass) text-(--text-main)">
-              Back
-            </button>
-          </form>
-        )}
+              <form onSubmit={handleResetPassword} className="space-y-5">
+                <input type="password" placeholder="New password"
+                  value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main) outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 focus:bg-(--bg-surface) transition-all duration-200" />
 
-        {/* RESET */}
-        {step === "reset" && (
-          <form onSubmit={handleResetPassword} className="space-y-5">
-            <input type="password" placeholder="New password"
-              value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main)" />
+                <input type="password" placeholder="Confirm password"
+                  value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main) outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 focus:bg-(--bg-surface) transition-all duration-200" />
 
-            <input type="password" placeholder="Confirm password"
-              value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main)" />
+                <button disabled={loading}
+                  className="w-full py-3.5 rounded-xl font-semibold text-white bg-green-600 hover:bg-green-700 hover:brightness-110 active:scale-[0.99] transition-all duration-300 disabled:opacity-50 cursor-pointer">
+                  {loading ? "Resetting..." : "Reset Password"}
+                </button>
 
-            <button disabled={loading}
-              className="w-full py-3 rounded-xl font-semibold text-white bg-green-600 hover:bg-green-700">
-              {loading ? "Resetting..." : "Reset Password"}
-            </button>
-
-            <button type="button" onClick={() => setStep("login")}
-              className="w-full py-3 rounded-xl bg-(--bg-glass) text-(--text-main)">
-              Cancel
-            </button>
-          </form>
-        )}
-
-        <p className="text-center text-sm text-(--text-muted) mt-8">
-          Don&apos;t have an account?{" "}
-          <Link to="/register" className="text-(--accent-primary) hover:underline">
-            Register
-          </Link>
-        </p>
+                <button type="button" onClick={() => setStep("login")}
+                  className="w-full py-3 rounded-xl bg-(--bg-glass) border border-(--border-main) text-(--text-main) hover:bg-(--bg-surface) transition duration-200 cursor-pointer">
+                  Cancel
+                </button>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );
