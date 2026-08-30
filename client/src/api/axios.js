@@ -1,7 +1,7 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-let rawBaseURL = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
+let rawBaseURL = (import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1").trim();
 rawBaseURL = rawBaseURL.replace(/\/+$/, "");
 if (!rawBaseURL.endsWith("/api/v1")) {
   rawBaseURL += "/api/v1";

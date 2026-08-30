@@ -38,6 +38,7 @@ app.use(cookieParser());
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
+  "https://lms-bay-iota.vercel.app",
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
@@ -45,20 +46,29 @@ app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
-      if (
-        allowedOrigins.includes(origin) ||
-        origin.endsWith(".vercel.app") ||
-        process.env.NODE_ENV !== "production"
-      ) {
+      const cleanOrigin = origin.replace(/\/+$/, "");
+      const isAllowed =
+        allowedOrigins.some((o) => o.replace(/\/+$/, "") === cleanOrigin) ||
+        cleanOrigin.endsWith(".vercel.app") ||
+        process.env.NODE_ENV !== "production";
+
+      if (isAllowed) {
         return callback(null, origin);
       }
       return callback(null, origin);
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
   })
 );
 
 // session
+const isProdEnvironment =
+  process.env.NODE_ENV === "production" ||
+  process.env.RENDER === "true" ||
+  (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes("localhost"));
+
 app.use(
   session({
     name: "Brainera-session",
@@ -66,19 +76,19 @@ app.use(
     resave: false,
     saveUninitialized: false,
 
-    rolling: true,   // Auto-extend on activity
+    rolling: true, // Auto-extend on activity
 
     store: MongoStore.create({
       mongoUrl: process.env.URL,
-      ttl: 60 * 60 * 24   // 24 hours (in seconds)
+      ttl: 60 * 60 * 24, // 24 hours (in seconds)
     }),
 
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1000 * 60 * 60 * 24  // 24 hours (in milliseconds)
-    }
+      secure: isProdEnvironment,
+      sameSite: isProdEnvironment ? "none" : "lax",
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours (in milliseconds)
+    },
   })
 );
 
